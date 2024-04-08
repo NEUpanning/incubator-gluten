@@ -59,7 +59,7 @@ private[glutenproject] class GlutenDriverPlugin extends DriverPlugin with Loggin
   override def init(sc: SparkContext, pluginContext: PluginContext): util.Map[String, String] = {
     _sc = Some(sc)
     GlutenEventUtils.registerListener(sc)
-    postBuildInfoEvent(sc)
+    postBuildInfoEvent(sc) // 发布 gluten build info 的 event，会触发listener保存info供UI使用
 
     val conf = pluginContext.conf()
     if (conf.getBoolean(GlutenConfig.UT_STATISTIC.key, defaultValue = false)) {
@@ -67,12 +67,12 @@ private[glutenproject] class GlutenDriverPlugin extends DriverPlugin with Loggin
       TestStats.beginStatistic()
     }
 
-    setPredefinedConfigs(sc, conf)
+    setPredefinedConfigs(sc, conf) // 将 spark 的config配置给 Gluten
     // Initialize Backends API
     BackendsApiManager.initialize()
-    BackendsApiManager.getListenerApiInstance.onDriverStart(conf)
+    BackendsApiManager.getListenerApiInstance.onDriverStart(conf) // init velox backend
     GlutenDriverEndpoint.glutenDriverEndpointRef = (new GlutenDriverEndpoint).self
-    GlutenListenerFactory.addToSparkListenerBus(sc)
+    GlutenListenerFactory.addToSparkListenerBus(sc) // 将GlutenSQLAppStatusListener注册到spark的 event bus
     ExpressionMappings.expressionExtensionTransformer =
       ExpressionUtil.extendedExpressionTransformer(
         conf.get(GlutenConfig.GLUTEN_EXTENDED_EXPRESSION_TRAN_CONF, "")

@@ -25,7 +25,7 @@ import org.apache.spark.sql.internal.StaticSQLConf._
 import org.apache.spark.status.{ElementTrackingStore, KVUtils}
 
 import scala.collection.mutable
-
+//  listening to events from the Spark scheduler.
 class GlutenSQLAppStatusListener(conf: SparkConf, kvstore: ElementTrackingStore)
   extends SparkListener
   with Logging {
@@ -82,11 +82,11 @@ class GlutenSQLAppStatusListener(conf: SparkConf, kvstore: ElementTrackingStore)
     executionIdToDescription.remove(event.executionId)
     executionIdToFallbackEvent.remove(event.executionId)
   }
-
+  // 对于几种event的listener
   override def onOtherEvent(event: SparkListenerEvent): Unit = event match {
     case e: SparkListenerSQLExecutionStart => onSQLExecutionStart(e)
     case e: SparkListenerSQLExecutionEnd => onSQLExtensionEnd(e)
-    case e: GlutenBuildInfoEvent => onGlutenBuildInfo(e)
+    case e: GlutenBuildInfoEvent => onGlutenBuildInfo(e) // 这两个GlutenEvent 都是保存数据，供spark UI使用
     case e: GlutenPlanFallbackEvent => onGlutenPlanFallback(e)
     case _ => // Ignore
   }
