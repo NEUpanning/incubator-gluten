@@ -289,7 +289,7 @@ case class TransformPreOverrides(isAdaptiveContext: Boolean)
     TransformHints.getHint(plan) match {
       case _: TRANSFORM_SUPPORTED =>
       // supported, break
-      case _: TRANSFORM_UNSUPPORTED =>
+      case _: TRANSFORM_UNSUPPORTED => // 替换 PartitionFilters 以支持 spark DPP
         logDebug(s"Columnar Processing for ${plan.getClass} is under row guard.")
         plan match {
           case shj: ShuffledHashJoinExec =>
@@ -320,7 +320,7 @@ case class TransformPreOverrides(isAdaptiveContext: Boolean)
             return p.withNewChildren(p.children.map(replaceWithTransformerPlan))
         }
     }
-    plan match {
+    plan match { // 递归子树替换 spark plan为 transform plan
       case plan: BatchScanExec =>
         applyScanTransformer(plan)
       case plan: FileSourceScanExec =>
@@ -768,7 +768,7 @@ case class ColumnarOverrideRules(session: SparkSession)
     Option(session.sparkContext.getLocalProperty(GLUTEN_IS_ADAPTIVE_CONTEXT))
       .getOrElse("false")
       .toBoolean ||
-      localIsAdaptiveContextFlags.get().head
+      localIsAdaptiveContextFlags.get().head // 线上spark开启了
 
   private def setAdaptiveContext(): Unit = {
     val traceElements = Thread.currentThread.getStackTrace
@@ -802,7 +802,7 @@ case class ColumnarOverrideRules(session: SparkSession)
 
   private def resetOriginalPlan(): Unit = localOriginalPlans.get.remove(0)
 
-  private def preOverrides(): List[SparkSession => Rule[SparkPlan]] = {
+  private def preOverrides(): List[SparkSession => Rule[SparkPlan]] = { // rule 列表
     val tagBeforeTransformHitsRules =
       if (isAdaptiveContext) {
         // When AQE is supported, rules are applied in ColumnarQueryStagePrepOverrides
@@ -810,7 +810,7 @@ case class ColumnarOverrideRules(session: SparkSession)
       } else {
         TagBeforeTransformHits.ruleBuilders
       }
-    tagBeforeTransformHitsRules :::
+    tagBeforeTransformHitsRules ::: // 后面的rule放在list前面
       List(
         (spark: SparkSession) => PlanOneRowRelation(spark),
         (_: SparkSession) => FallbackEmptySchemaRelation(),
@@ -819,8 +819,8 @@ case class ColumnarOverrideRules(session: SparkSession)
         (spark: SparkSession) => RewriteTransformer(spark),
         (_: SparkSession) => EnsureLocalSortRequirements
       ) :::
-      BackendsApiManager.getSparkPlanExecApiInstance.genExtendedColumnarPreRules() :::
-      SparkRuleUtil.extendedColumnarRules(session, GlutenConfig.getConf.extendedColumnarPreRules)
+      BackendsApiManager.getSparkPlanExecApiInstance.genExtendedColumnarPreRules() ::: // 当前为空
+      SparkRuleUtil.extendedColumnarRules(session, GlutenConfig.getConf.extendedColumnarPreRules)// gluten 开发者自定义的rule，默认为空
   }
 
   private def fallbackPolicy(): List[SparkSession => Rule[SparkPlan]] = {
@@ -829,32 +829,32 @@ case class ColumnarOverrideRules(session: SparkSession)
 
   private def postOverrides(): List[SparkSession => Rule[SparkPlan]] =
     List(
-      (_: SparkSession) => TransformPostOverrides(isAdaptiveContext),
+      (_: SparkSession) => TransformPostOverrides(isAdaptiveContext), // 将c2r r2c转换为native 版本的
       (s: SparkSession) => VanillaColumnarPlanOverrides(s)
     ) :::
       BackendsApiManager.getSparkPlanExecApiInstance.genExtendedColumnarPostRules() :::
-      List((_: SparkSession) => ColumnarCollapseTransformStages(GlutenConfig.getConf)) :::
+      List((_: SparkSession) => ColumnarCollapseTransformStages(GlutenConfig.getConf)) ::: // 插入WholeStageTransformer
       SparkRuleUtil.extendedColumnarRules(session, GlutenConfig.getConf.extendedColumnarPostRules)
 
   private def finallyRules(): List[SparkSession => Rule[SparkPlan]] = {
     List(
-      (s: SparkSession) => GlutenFallbackReporter(GlutenConfig.getConf, s),
-      (_: SparkSession) => RemoveTransformHintRule()
+      (s: SparkSession) => GlutenFallbackReporter(GlutenConfig.getConf, s), // 上报fallback reason
+      (_: SparkSession) => RemoveTransformHintRule()// remove hint tag
     )
   }
 
   override def preColumnarTransitions: Rule[SparkPlan] = plan =>
     PhysicalPlanSelector.maybe(session, plan) {
-      setAdaptiveContext()
-      setOriginalPlan(plan)
+      setAdaptiveContext() // 根据线程栈判断方法是否是被AdaptiveSparkPlanExec调用的，进行标记AQE.
+      setOriginalPlan(plan) // 保存 vanilla spark plan
       transformPlan(preOverrides(), plan, "pre")
     }
 
   override def postColumnarTransitions: Rule[SparkPlan] = plan =>
-    PhysicalPlanSelector.maybe(session, plan) {
-      val planWithFallbackPolicy = transformPlan(fallbackPolicy(), plan, "fallback")
+    PhysicalPlanSelector.maybe(session, plan) { // velox backend将直接执行下面 block
+      val planWithFallbackPolicy = transformPlan(fallbackPolicy(), plan, "fallback") // 判断是否需要 Fallback，需要则插入native c2r r2c 打tag
       val finalPlan = planWithFallbackPolicy match {
-        case FallbackNode(fallbackPlan) =>
+        case FallbackNode(fallbackPlan) => // 整个 plan fallback到vanilla
           // we should use vanilla c2r rather than native c2r,
           // and there should be no `GlutenPlan` any more,
           // so skip the `postOverrides()`.
@@ -862,7 +862,7 @@ case class ColumnarOverrideRules(session: SparkSession)
         case plan =>
           transformPlan(postOverrides(), plan, "post")
       }
-      resetOriginalPlan()
+      resetOriginalPlan() // 清除 vanilla spark plan, AQE flag
       resetAdaptiveContext()
       transformPlan(finallyRules(), finalPlan, "final")
     }
@@ -876,8 +876,8 @@ case class ColumnarOverrideRules(session: SparkSession)
       s"${step}ColumnarTransitions preOverriden plan:\n${plan.toString}")
     val overridden = getRules.foldLeft(plan) {
       (p, getRule) =>
-        val rule = getRule(session)
-        val newPlan = rule(p)
+        val rule = getRule(session) // 使用 getRules 的元素获得rule
+        val newPlan = rule(p) // 使用rule转换plan
         planChangeLogger.logRule(rule.ruleName, p, newPlan)
         newPlan
     }

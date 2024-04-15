@@ -71,7 +71,7 @@ abstract class QueryPlanSelector[T <: QueryPlan[_]] extends Logging {
   }
 
   def maybe(session: SparkSession, plan: T)(func: => T): T = {
-    if (shouldUseGluten(session, plan)) func else plan
+    if (shouldUseGluten(session, plan)) func else plan // velox 肯定执行 func
   }
 
   def maybeNil(session: SparkSession, plan: T)(func: => Seq[SparkPlan]): Seq[SparkPlan] = {

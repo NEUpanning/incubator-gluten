@@ -138,7 +138,7 @@ object TagBeforeTransformHits {
     List(FallbackOnANSIMode, FallbackMultiCodegens)
   }
 }
-
+// gluten不支持ANSI，全部plan标记为不支持
 case class FallbackOnANSIMode(session: SparkSession) extends Rule[SparkPlan] {
   override def apply(plan: SparkPlan): SparkPlan = PhysicalPlanSelector.maybe(session, plan) {
     if (GlutenConfig.getConf.enableAnsiMode) {
@@ -312,13 +312,13 @@ case class AddTransformHintRule() extends Rule[SparkPlan] {
   }
 
   /** Inserts a transformable tag on top of those that are not supported. */
-  private def addTransformableTags(plan: SparkPlan): SparkPlan = {
+  private def addTransformableTags(plan: SparkPlan): SparkPlan = { // 递归向 children 执行，先执行 children
     // Walk the tree with post-order
     val out = plan.withNewChildren(plan.children.map(addTransformableTags))
     addTransformableTag(out)
     out
   }
-
+  // 部分算子如果enable 并且 validate通过将打上supported的tag，否则unsupported
   private def addTransformableTag(plan: SparkPlan): Unit = {
     if (TransformHints.isAlreadyTagged(plan)) {
       logDebug(

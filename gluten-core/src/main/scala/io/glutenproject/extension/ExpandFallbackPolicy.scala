@@ -191,7 +191,7 @@ case class ExpandFallbackPolicy(isAdaptiveContext: Boolean, originalPlan: SparkP
     }.isDefined
   }
 
-  private def fallback(plan: SparkPlan): Option[String] = {
+  private def fallback(plan: SparkPlan): Option[String] = {// 如果Fallback 的算子数量大于阈值则返回reason
     val fallbackThreshold = if (isAdaptiveContext) {
       GlutenConfig.getConf.wholeStageFallbackThreshold
     } else if (plan.find(_.isInstanceOf[AdaptiveSparkPlanExec]).isDefined) {
@@ -228,8 +228,8 @@ case class ExpandFallbackPolicy(isAdaptiveContext: Boolean, originalPlan: SparkP
 
   private def fallbackToRowBasedPlan(): SparkPlan = {
     val transformPostOverrides = TransformPostOverrides(isAdaptiveContext)
-    val planWithColumnarToRow = InsertTransitions.insertTransitions(originalPlan, false)
-    planWithColumnarToRow.transform {
+    val planWithColumnarToRow = InsertTransitions.insertTransitions(originalPlan, false) // 由于fallback需要插入c2r
+    planWithColumnarToRow.transform { // 将ShuffleQueryStageExec和AQEShuffleReadExec的c2r和r2c转换为 native 实现
       case c2r @ ColumnarToRowExec(_: ShuffleQueryStageExec) =>
         transformPostOverrides.transformColumnarToRowExec(c2r)
       case c2r @ ColumnarToRowExec(_: AQEShuffleReadExec) =>
@@ -242,10 +242,10 @@ case class ExpandFallbackPolicy(isAdaptiveContext: Boolean, originalPlan: SparkP
   }
 
   override def apply(plan: SparkPlan): SparkPlan = {
-    val reason = fallback(plan)
-    if (reason.isDefined) {
+    val reason = fallback(plan) // 是否需要将整个spark plan Fallback 到 vanilla spark plan
+    if (reason.isDefined) { // 回退到原生的plan
       val fallbackPlan = fallbackToRowBasedPlan()
-      TransformHints.tagAllNotTransformable(fallbackPlan, reason.get)
+      TransformHints.tagAllNotTransformable(fallbackPlan, reason.get) // 非gluten plan打上unsupported的tag
       FallbackNode(fallbackPlan)
     } else {
       plan

@@ -137,7 +137,7 @@ case class ColumnarCollapseTransformStages(
     }
   }
 
-  private def insertWholeStageTransformer(plan: SparkPlan): SparkPlan = {
+  private def insertWholeStageTransformer(plan: SparkPlan): SparkPlan = { // 连续的supportTransform的gluten spark plan转换为整个WholeStageTransformer
     plan match {
       case t if supportTransform(t) =>
         WholeStageTransformer(t.withNewChildren(t.children.map(insertInputAdapter)))(
