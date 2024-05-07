@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<topics>
+  <topic>
+    <name>executor</name>
+    <note>explain打印的物理计划：
+VeloxColumnarToRowExec
++- ^(4) FilterExecTransformer (isnotnull(cluster_name#83) AND (cluster_name#83 = lc_bj_1))
+   +- RowToVeloxColumnar
+      +- Scan hive origindb.rtlc_logcenter__lc_es_clusters [cluster_name#83], HiveTableRelation `origindb`.`rtlc_logcenter__lc_es_clusters`, com.meituan.hidi.hive.HidiSerde, [id#82L, cluster_name#83, es_version#84, http_query_url#85, thrift_query_url#86, http_write_url#87, thrift_write_url#88, description#89, enabled#90, idle#91L, role#92L, data_node_count#93L, clusters_nodes_counts#94L, is_monitor_alarm#95, max_flow_size#96L, max_flow_time#97, top_speed#98L, min_node_disk#99L, situation#100L, search_limit_percentage#101, whether_online_search_optimization#102, role_important#103L, security#104, region#105, _update_timestamp#106]
+
+
+以上执行计划在executor节点的执行流程，虽然输出的物理计划中没有WholeStageTransformer，但实际的spark plan数中WholeStageTransformer为全是gluten plan子树的根节点
+
+内存中实际的spark plan结构：
+VeloxColumnarToRowExec
++- WholeStageTransformer
+    +- FilterExecTransformer
+        +- ColumnarInputAdapter
+            +- RowToVeloxColumnarExec
+                 +- Scan hive origindb.rtlc_logcenter__lc_es_clusters</note>
+    <updatedAt>2024-05-06 20:23:23</updatedAt>
+    <topicLines>
+      <topicLine>
+        <line>180</line>
+        <inProject>false</inProject>
+        <url>jar:///Users/panning/.m2/repository/org/apache/spark/spark-sql_2.12/3.2.2/spark-sql_2.12-3.2.2-sources.jar!/org/apache/spark/sql/execution/SparkPlan.scala</url>
+        <note>spark 从 plan 的根节点开始execute</note>
+        <relativePath />
+      </topicLine>
+      <topicLine>
+        <line>67</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/incubator-gluten/backends-velox/src/main/scala/io/glutenproject/execution/VeloxColumnarToRowExec.scala</url>
+        <note>首先到c2r的execute</note>
+        <relativePath>backends-velox/src/main/scala/io/glutenproject/execution/VeloxColumnarToRowExec.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>71</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/incubator-gluten/backends-velox/src/main/scala/io/glutenproject/execution/VeloxColumnarToRowExec.scala</url>
+        <note>先执行子节点的executeColumnar</note>
+        <relativePath>backends-velox/src/main/scala/io/glutenproject/execution/VeloxColumnarToRowExec.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>73</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/incubator-gluten/backends-velox/src/main/scala/io/glutenproject/execution/VeloxColumnarToRowExec.scala</url>
+        <note>将 ColumnarBatch iterator转换为 InternalRow iterator</note>
+        <relativePath>backends-velox/src/main/scala/io/glutenproject/execution/VeloxColumnarToRowExec.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>103</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/incubator-gluten/backends-velox/src/main/scala/io/glutenproject/execution/VeloxColumnarToRowExec.scala</url>
+        <note>在iterator的next方法中，使用native方法实现了列式数据转为行数据</note>
+        <relativePath>backends-velox/src/main/scala/io/glutenproject/execution/VeloxColumnarToRowExec.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>258</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/execution/WholeStageTransformer.scala</url>
+        <note>WholeStageTransformer执行</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/execution/WholeStageTransformer.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>260</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/execution/WholeStageTransformer.scala</url>
+        <note>获取子树第一个非transformer的rdd.executeColumnar作为输入，在本示例中将使用ColumnarInputAdapter.executeColumnar作为输入，他将直接调用RowToVeloxColumnar.executeColumnar</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/execution/WholeStageTransformer.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>61</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/incubator-gluten/backends-velox/src/main/scala/io/glutenproject/execution/RowToVeloxColumnarExec.scala</url>
+        <note>和c2r类似r2c也直接创建一个iterator</note>
+        <relativePath>backends-velox/src/main/scala/io/glutenproject/execution/RowToVeloxColumnarExec.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>274</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/execution/WholeStageTransformer.scala</url>
+        <note>将整个子树转换为substait plan</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/execution/WholeStageTransformer.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>188</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/execution/WholeStageTransformer.scala</url>
+        <note>调用算子的doTransform方法进行转换</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/execution/WholeStageTransformer.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>50</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/incubator-gluten/backends-velox/src/main/scala/io/glutenproject/execution/FilterExecTransformer.scala</url>
+        <note>支持transform的子节点转换为Substrait plan</note>
+        <relativePath>backends-velox/src/main/scala/io/glutenproject/execution/FilterExecTransformer.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>64</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/incubator-gluten/backends-velox/src/main/scala/io/glutenproject/execution/FilterExecTransformer.scala</url>
+        <note>本算子转换</note>
+        <relativePath>backends-velox/src/main/scala/io/glutenproject/execution/FilterExecTransformer.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>321</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/execution/WholeStageTransformer.scala</url>
+        <note>使用Substrait plan创建WholeStageZippedPartitionsRDD</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/execution/WholeStageTransformer.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>46</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/execution/WholeStageZippedPartitionsRDD.scala</url>
+        <note>rdd的compute方法定义了具体的计算</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/execution/WholeStageZippedPartitionsRDD.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>168</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/incubator-gluten/backends-velox/src/main/scala/io/glutenproject/backendsapi/velox/IteratorApiImpl.scala</url>
+        <note>使用native创建 Iterator[ColumnarBatch]传参plan ，native负责数据处理</note>
+        <relativePath>backends-velox/src/main/scala/io/glutenproject/backendsapi/velox/IteratorApiImpl.scala</relativePath>
+      </topicLine>
+    </topicLines>
+  </topic>
+  <topic>
+    <name>gluten Injector</name>
+    <note>sparkPlan.transform(rule)会递归的向树的所有节点应用rule</note>
+    <updatedAt>2024-04-15 14:34:32</updatedAt>
+    <topicLines>
+      <topicLine>
+        <line>236</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</url>
+        <note>每个 injector 都添加到SparkSessionExtension</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>265</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</url>
+        <note>QueryStagePrepRule的实现QueryStagePrepOverrides包含FallbackOnANSIMode,FallbackMultiCodegens</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>141</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/extension/columnar/TransformHintRule.scala</url>
+        <note>gluten不支持ANSI，全部plan标记为不支持</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/extension/columnar/TransformHintRule.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>150</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/extension/columnar/TransformHintRule.scala</url>
+        <note>FallbackMultiCodegens。默认columnar physicalJoinOptimize为false，那么就是空逻辑</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/extension/columnar/TransformHintRule.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>266</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</url>
+        <note>ColumnarOverrideRules  规则，Spark 调用他的两个方法preColumnarTransitions和postColumnarTransitions，具体流程见笔记 spark/class/ColumnarRule</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>845</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</url>
+        <note>preColumnarTransitions将 SparkPlan 实例替换为 columnar operator</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>849</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</url>
+        <note>使用所有的gluten rule来转换plan</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>222</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/extension/columnar/TransformHintRule.scala</url>
+        <note>PlanOneRowRelation .gluten不支持ouput relation为空的情况，这个rule给加了 fake column</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/extension/columnar/TransformHintRule.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>250</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/extension/columnar/TransformHintRule.scala</url>
+        <note>在plan里不包含count1()和sum1()时，输出为空的节点打标不支持transform。后面支持了，将删除这个和上个 rule</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/extension/columnar/TransformHintRule.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>276</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/extension/columnar/TransformHintRule.scala</url>
+        <note>AddTransformHintRule. 将遍历节点及所有的children，执行XXXExecTransformer.validate检查是否支持offload，并将结果作为tag给plan标记上</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/extension/columnar/TransformHintRule.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>817</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</url>
+        <note>将 sparkplan转换为 gluten 的 transformer</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>287</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</url>
+        <note>使用 transformer plan 替换 spark plan，新的 transformer plan 不包含之前的tag</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>818</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</url>
+        <note>PartitionFilters .空实现</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>819</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</url>
+        <note>EnsureLocalSortRequirements  。sort 算子相关</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>822</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</url>
+        <note>gluten 开发者自定义的rule，默认为空</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>854</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</url>
+        <note>使用 ExpandFallbackPolicy 进行 transform</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>244</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/extension/ExpandFallbackPolicy.scala</url>
+        <note>是否需要将整个spark plan Fallback 到 vanilla spark plan，需要则插入 c2r r2c 打tag</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/extension/ExpandFallbackPolicy.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>829</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</url>
+        <note>非Fallback执行的rule</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>838</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</url>
+        <note>最后应用的rule</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/extension/ColumnarOverrides.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>267</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</url>
+        <note>JoinSelectionOverrides</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>268</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</url>
+        <note>OthersExtensionOverrides  backend提供的一些rule</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</relativePath>
+      </topicLine>
+    </topicLines>
+  </topic>
+  <topic>
+    <name>gluten driver</name>
+    <note>负责对Spark物理计划进行校验（validate）并转换(transform)成Substrait计划</note>
+    <updatedAt>2024-04-08 19:43:58</updatedAt>
+    <topicLines>
+      <topicLine>
+        <line>47</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</url>
+        <note>spark 触发 Gluten plugin 初始化</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>60</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</url>
+        <note>向spark注册Gluten listener，监听SparkListenerSQLExecutionStart和SparkListenerSQLExecutionEnd GlutenBuildInfoEvent GlutenPlanFallbackEvent事件</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>69</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</url>
+        <note>将spark conf赋值给Gluten conf，例如spark.memory.offHeap.size</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>137</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</url>
+        <note>如果conf没有指定SparkSessionExtensions，将配置为gluten定义的io.glutenproject.GlutenSessionExtensions，GlutenSessionExtensions负责将gluten自定义的规则注入到Spark session state，
+然后SQL查询便会使用这些规则</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>72</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</url>
+        <note>初始化velox backend，包括Gluten backend api和Native backend</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>134</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/backends-velox/src/main/scala/io/glutenproject/backendsapi/velox/ListenerApiImpl.scala</url>
+        <note>加载lib so文件</note>
+        <relativePath>backends-velox/src/main/scala/io/glutenproject/backendsapi/velox/ListenerApiImpl.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>153</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/backends-velox/src/main/scala/io/glutenproject/backendsapi/velox/ListenerApiImpl.scala</url>
+        <note>初始化Native backend</note>
+        <relativePath>backends-velox/src/main/scala/io/glutenproject/backendsapi/velox/ListenerApiImpl.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>74</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</url>
+        <note>将GlutenSQLAppStatusListener注册到spark的 event bus，</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>25</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/org/apache/spark/listener/GlutenSQLAppStatusListener.scala</url>
+        <note>GlutenSQLAppStatusListener负责在 executor 的生命周期的时间点通知 gluten driver进行资源的释放和分配。问题：看方法名是RPC调用，但spark driver应该和gluten driver在一个进程</note>
+        <relativePath>gluten-core/src/main/scala/org/apache/spark/listener/GlutenSQLAppStatusListener.scala</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>75</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/incubator-gluten/gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</url>
+        <note>根据配置反射创建 expressiontranformer</note>
+        <relativePath>gluten-core/src/main/scala/io/glutenproject/GlutenPlugin.scala</relativePath>
+      </topicLine>
+    </topicLines>
+  </topic>
+</topics>
+

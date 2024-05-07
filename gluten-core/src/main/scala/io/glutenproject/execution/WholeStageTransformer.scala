@@ -186,7 +186,7 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
     val substraitContext = new SubstraitContext
     val childCtx = child
       .asInstanceOf[TransformSupport]
-      .doTransform(substraitContext)
+      .doTransform(substraitContext) // 将transformer转换为substrait plan保存到 context中
     if (childCtx == null) {
       throw new NullPointerException(s"WholeStageTransformer can't do Transform on $child")
     }
@@ -219,7 +219,7 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
   def doWholeStageTransform(): WholeStageTransformContext = {
     // invoke SparkPlan.prepare to do subquery preparation etc.
     super.prepare()
-    val context = generateWholeStageTransformContext()
+    val context = generateWholeStageTransformContext() // substrait plan context
     if (conf.getConf(GlutenConfig.CACHE_WHOLE_STAGE_TRANSFORMER_CONTEXT)) {
       wholeStageTransformerContext = Some(context)
     }
@@ -258,7 +258,7 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
 
   override def doExecuteColumnar(): RDD[ColumnarBatch] = {
     val pipelineTime: SQLMetric = longMetric("pipelineTime")
-    val inputRDDs = new ColumnarInputRDDsWrapper(columnarInputRDDs)
+    val inputRDDs = new ColumnarInputRDDsWrapper(columnarInputRDDs) // 获取子树第一个非transformer的rdd作为输入
     // Check if BatchScan exists.
     val basicScanExecTransformers = findAllScanTransformers()
 

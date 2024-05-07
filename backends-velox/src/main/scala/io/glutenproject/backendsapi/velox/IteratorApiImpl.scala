@@ -162,7 +162,7 @@ class IteratorApiImpl extends IteratorApi with Logging {
       inputIterators: Seq[Iterator[ColumnarBatch]],
       numaBindingInfo: GlutenNumaBindingInfo,
       sparkConf: SparkConf,
-      rootNode: PlanNode,
+      rootNode: PlanNode, // substrait plan
       pipelineTime: SQLMetric,
       updateNativeMetrics: IMetrics => Unit,
       buildRelationBatchHolder: Seq[ColumnarBatch],
@@ -178,7 +178,7 @@ class IteratorApiImpl extends IteratorApi with Logging {
     val nativeResultIterator =
       transKernel.createKernelWithBatchIterator(
         rootNode.toProtobuf.toByteArray,
-        columnarNativeIterator)
+        columnarNativeIterator) // 调用 native 接口创建 iterator，iterator用来迭代结果进行计算
 
     Iterators
       .wrap(nativeResultIterator.asScala)

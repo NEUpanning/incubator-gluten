@@ -71,7 +71,7 @@ case class VeloxColumnarToRowExec(child: SparkPlan) extends ColumnarToRowExecBas
     val convertTime = longMetric("convertTime")
     child.executeColumnar().mapPartitions {
       it =>
-        VeloxColumnarToRowExec.toRowIterator(
+        VeloxColumnarToRowExec.toRowIterator(// 将 ColumnarBatch iterator转换为 InternalRow iterator
           it,
           output,
           numOutputRows,
@@ -135,7 +135,7 @@ object VeloxColumnarToRowExec {
           val beforeConvert = System.currentTimeMillis()
           val batchHandle = ColumnarBatches.getNativeHandle(batch)
           val info =
-            jniWrapper.nativeColumnarToRowConvert(batchHandle, c2rId)
+            jniWrapper.nativeColumnarToRowConvert(batchHandle, c2rId) // 使用native方法进行数据r2c
 
           convertTime += (System.currentTimeMillis() - beforeConvert)
 
