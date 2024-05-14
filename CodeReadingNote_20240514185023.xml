@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<topics>
+  <topic>
+    <name>plan validator</name>
+    <note />
+    <updatedAt>2024-05-14 18:46:51</updatedAt>
+    <topicLines>
+      <topicLine>
+        <line>87</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/jni/VeloxJniWrapper.cc</url>
+        <note>jni调用plan validator的入口，传参为pb格式的substrait plan(byte array)</note>
+        <relativePath>velox/jni/VeloxJniWrapper.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>108</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/jni/VeloxJniWrapper.cc</url>
+        <note>pb 格式的Substrait plan转换为对象</note>
+        <relativePath>velox/jni/VeloxJniWrapper.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>113</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/jni/VeloxJniWrapper.cc</url>
+        <note>创建query context使用dummy config</note>
+        <relativePath>velox/jni/VeloxJniWrapper.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>126</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/jni/VeloxJniWrapper.cc</url>
+        <note>执行validate</note>
+        <relativePath>velox/jni/VeloxJniWrapper.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>1264</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/substrait/SubstraitToVeloxPlanValidator.cc</url>
+        <note>对PlanRel进行validate</note>
+        <relativePath>velox/substrait/SubstraitToVeloxPlanValidator.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>1221</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/substrait/SubstraitToVeloxPlanValidator.cc</url>
+        <note>根据rel对应的type获取子类型rel进行validate</note>
+        <relativePath>velox/substrait/SubstraitToVeloxPlanValidator.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>761</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/substrait/SubstraitToVeloxPlanValidator.cc</url>
+        <note>以projectRel为例</note>
+        <relativePath>velox/substrait/SubstraitToVeloxPlanValidator.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>762</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/substrait/SubstraitToVeloxPlanValidator.cc</url>
+        <note>如果rel包含子节点则validate 子节点</note>
+        <relativePath>velox/substrait/SubstraitToVeloxPlanValidator.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>774</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/substrait/SubstraitToVeloxPlanValidator.cc</url>
+        <note>validate extension.enhancement type，就是算子的 input type</note>
+        <relativePath>velox/substrait/SubstraitToVeloxPlanValidator.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>98</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/substrait/SubstraitToVeloxPlanValidator.cc</url>
+        <note>将substrait type转换为velox type，如果不支持则抛出异常，validate失败</note>
+        <relativePath>velox/substrait/SubstraitToVeloxPlanValidator.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>336</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/substrait/SubstraitToVeloxPlanValidator.cc</url>
+        <note>根据function type执行validate</note>
+        <relativePath>velox/substrait/SubstraitToVeloxPlanValidator.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>182</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/substrait/SubstraitToVeloxPlanValidator.cc</url>
+        <note>expression参数的类型和是否有值校验</note>
+        <relativePath>velox/substrait/SubstraitToVeloxPlanValidator.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>193</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/substrait/SubstraitToVeloxPlanValidator.cc</url>
+        <note>部分function的定制validate策略</note>
+        <relativePath>velox/substrait/SubstraitToVeloxPlanValidator.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>232</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/substrait/SubstraitToVeloxPlanValidator.cc</url>
+        <note>如果funtion还不支持则返回false</note>
+        <relativePath>velox/substrait/SubstraitToVeloxPlanValidator.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>797</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/substrait/SubstraitToVeloxPlanValidator.cc</url>
+        <note>将expression转换为velox expression，会查找substraitVeloxFunctionMap_</note>
+        <relativePath>velox/substrait/SubstraitToVeloxPlanValidator.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>801</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/substrait/SubstraitToVeloxPlanValidator.cc</url>
+        <note>尝试compile expression，如果expression没有在velox注册则抛出异常</note>
+        <relativePath>velox/substrait/SubstraitToVeloxPlanValidator.cc</relativePath>
+      </topicLine>
+    </topicLines>
+  </topic>
+  <topic>
+    <name>主流程 create iterator</name>
+    <note>假设backend为velox</note>
+    <updatedAt>2024-05-07 15:04:45</updatedAt>
+    <topicLines>
+      <topicLine>
+        <line>367</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/core/jni/JniWrapper.cc</url>
+        <note>gluten java通过jni调用该native方法</note>
+        <relativePath>core/jni/JniWrapper.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>381</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/core/jni/JniWrapper.cc</url>
+        <note>创建velox runtime</note>
+        <relativePath>core/jni/JniWrapper.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>384</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/core/jni/JniWrapper.cc</url>
+        <note>配置split info给runtime</note>
+        <relativePath>core/jni/JniWrapper.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>388</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/core/jni/JniWrapper.cc</url>
+        <note>为了debug可以把substrait plan保存到磁盘</note>
+        <relativePath>core/jni/JniWrapper.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>404</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/core/jni/JniWrapper.cc</url>
+        <note>将 pb 格式plan转为substrait plan对象，存在runtime中</note>
+        <relativePath>core/jni/JniWrapper.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>58</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/compute/VeloxRuntime.cc</url>
+        <note>将 pb 格式plan转为substrait plan对象，存在runtime中</note>
+        <relativePath>velox/compute/VeloxRuntime.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>411</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/core/jni/JniWrapper.cc</url>
+        <note>将 pb 格式split info转为substrait ReadRel_LocalFiles对象，存在runtime中。 ReadRel_LocalFiles 表示一组文件，用于scan operator</note>
+        <relativePath>core/jni/JniWrapper.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>424</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/core/jni/JniWrapper.cc</url>
+        <note>构建inputIterators</note>
+        <relativePath>core/jni/JniWrapper.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>438</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/core/jni/JniWrapper.cc</url>
+        <note>使用runtime构建result iterator</note>
+        <relativePath>core/jni/JniWrapper.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>110</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/compute/VeloxRuntime.cc</url>
+        <note>构建result iterator</note>
+        <relativePath>velox/compute/VeloxRuntime.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>119</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/compute/VeloxRuntime.cc</url>
+        <note>将Substrait plan转换为velox plan</note>
+        <relativePath>velox/compute/VeloxRuntime.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>129</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/compute/VeloxPlanConverter.cc</url>
+        <note>调用 Substrait 文件夹来转换plan</note>
+        <relativePath>velox/compute/VeloxPlanConverter.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>1232</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/substrait/SubstraitToVeloxPlan.cc</url>
+        <note>真正将Substrait plan转换为velox plan</note>
+        <relativePath>velox/substrait/SubstraitToVeloxPlan.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>130</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/compute/VeloxRuntime.cc</url>
+        <note>使用之前的参数构建WholeStageResultIterator</note>
+        <relativePath>velox/compute/VeloxRuntime.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>218</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/compute/WholeStageResultIterator.cc</url>
+        <note>WholeStageResultIterator的next方法实现了数据的处理</note>
+        <relativePath>velox/compute/WholeStageResultIterator.cc</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>223</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/VSProjects/glutenNvelox_CE/gluten/incubator-gluten/cpp/velox/compute/WholeStageResultIterator.cc</url>
+        <note>调用velox task处理数据</note>
+        <relativePath>velox/compute/WholeStageResultIterator.cc</relativePath>
+      </topicLine>
+    </topicLines>
+  </topic>
+</topics>
+
