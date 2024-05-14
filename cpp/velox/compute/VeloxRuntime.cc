@@ -56,7 +56,7 @@ void VeloxRuntime::parsePlan(const uint8_t* data, int32_t size, std::optional<st
     }
   }
 
-  GLUTEN_CHECK(parseProtobuf(data, size, &substraitPlan_) == true, "Parse substrait plan failed");
+  GLUTEN_CHECK(parseProtobuf(data, size, &substraitPlan_) == true, "Parse substrait plan failed"); // 保存substraitPlan_
 }
 
 void VeloxRuntime::parseSplitInfo(const uint8_t* data, int32_t size, std::optional<std::string> dumpFile) {

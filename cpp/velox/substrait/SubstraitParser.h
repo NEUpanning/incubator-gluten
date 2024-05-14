@@ -36,21 +36,21 @@ namespace gluten {
 /// components, and convert them into recognizable representations.
 class SubstraitParser {
  public:
-  /// Used to parse Substrait NamedStruct.
+  /// Used to parse Substrait NamedStruct. 将Substrait NamedStruct中的type转换为 velox type
   static std::vector<facebook::velox::TypePtr> parseNamedStruct(
       const ::substrait::NamedStruct& namedStruct,
       bool asLowerCase = false);
 
-  /// Used to parse partition & metadata columns from Substrait NamedStruct.
+  /// Used to parse partition & metadata columns from Substrait NamedStruct. 将Substrait NamedStruct中的column type的isPartition isMetadata读取出来
   static void parsePartitionAndMetadataColumns(
       const ::substrait::NamedStruct& namedStruct,
       std::vector<bool>& isPartitionColumns,
       std::vector<bool>& isMetadataColumns);
 
-  /// Parse Substrait Type to Velox type.
+  /// Parse Substrait Type to Velox type.将Substrait中的type转换为 velox type
   static facebook::velox::TypePtr parseType(const ::substrait::Type& substraitType, bool asLowerCase = false);
 
-  /// Parse Substrait ReferenceSegment.
+  /// Parse Substrait ReferenceSegment. ReferenceSegment可以依赖复杂类型的内部成员，比如map中的key，struct中的field。该方法提取出该成员的index
   static int32_t parseReferenceSegment(const ::substrait::Expression::ReferenceSegment& refSegment);
 
   /// Make names in the format of {prefix}_{index}.

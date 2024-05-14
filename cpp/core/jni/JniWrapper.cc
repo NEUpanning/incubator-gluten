@@ -379,14 +379,14 @@ Java_org_apache_gluten_vectorized_PlanEvaluatorJniWrapper_nativeCreateKernelWith
     jstring spillDir) {
   JNI_METHOD_START
 
-  auto ctx = gluten::getRuntime(env, wrapper);
+  auto ctx = gluten::getRuntime(env, wrapper); // veloxRuntime
   auto& conf = ctx->getConfMap();
 
   ctx->setSparkTaskInfo({stageId, partitionId, taskId});
 
   std::string saveDir{};
   std::string fileIdentifier = "_" + std::to_string(stageId) + "_" + std::to_string(partitionId);
-  if (saveInput) {
+  if (saveInput) { // for debug
     if (conf.find(kGlutenSaveDir) == conf.end()) {
       throw gluten::GlutenException(kGlutenSaveDir + " is not configured.");
     }
@@ -407,7 +407,7 @@ Java_org_apache_gluten_vectorized_PlanEvaluatorJniWrapper_nativeCreateKernelWith
   ctx->parsePlan(
       safePlanArray.elems(),
       planSize,
-      saveInput ? std::optional<std::string>(saveDir + "/plan" + fileIdentifier + ".json") : std::nullopt);
+      saveInput ? std::optional<std::string>(saveDir + "/plan" + fileIdentifier + ".json") : std::nullopt); // 把plan dump下来，仅用于debug
 
   for (jsize i = 0, splitInfoArraySize = env->GetArrayLength(splitInfosArr); i < splitInfoArraySize; i++) {
     jbyteArray splitInfoArray = static_cast<jbyteArray>(env->GetObjectArrayElement(splitInfosArr, i));

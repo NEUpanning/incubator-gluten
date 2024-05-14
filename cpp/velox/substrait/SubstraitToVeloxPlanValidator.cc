@@ -58,7 +58,7 @@ static const std::unordered_set<std::string> kRegexFunctions = {
     "regexp_replace",
     "rlike"};
 
-static const std::unordered_set<std::string> kBlackList = {
+static const std::unordered_set<std::string> kBlackList = { // 不支持的function列表
     "split_part",
     "factorial",
     "concat_ws",
@@ -784,14 +784,14 @@ bool SubstraitToVeloxPlanValidator::validate(const ::substrait::ProjectRel& proj
   for (uint32_t colIdx = 0; colIdx < types.size(); colIdx++) {
     names.emplace_back(SubstraitParser::makeNodeName(inputPlanNodeId, colIdx));
   }
-  auto rowType = std::make_shared<RowType>(std::move(names), std::move(types));
+  auto rowType = std::make_shared<RowType>(std::move(names), std::move(types));// row每一列的name和type
 
   // Validate the project expressions.
-  const auto& projectExprs = projectRel.expressions();
+  const auto& projectExprs = projectRel.expressions(); // project 相关的expression
   std::vector<core::TypedExprPtr> expressions;
   expressions.reserve(projectExprs.size());
   try {
-    for (const auto& expr : projectExprs) {
+    for (const auto& expr : projectExprs) { // validate所有的expression
       if (!validateExpression(expr, rowType)) {
         return false;
       }
@@ -1259,14 +1259,14 @@ bool SubstraitToVeloxPlanValidator::validate(const ::substrait::RelRoot& relRoot
 
 bool SubstraitToVeloxPlanValidator::validate(const ::substrait::Plan& plan) {
   // Create plan converter and expression converter to help the validation.
-  planConverter_.constructFunctionMap(plan);
+  planConverter_.constructFunctionMap(plan); // 只对extension构建map，mapping nodes不会
   exprConverter_ = planConverter_.getExprConverter();
 
   for (const auto& rel : plan.relations()) {
-    if (rel.has_root()) {
+    if (rel.has_root()) { // PlanRel包含根节点则validate 根节点
       return validate(rel.root());
     } else if (rel.has_rel()) {
-      return validate(rel.rel());
+      return validate(rel.rel()); // validate relation
     }
   }
 

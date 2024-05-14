@@ -376,7 +376,7 @@ StringView SubstraitParser::getLiteralValue(const ::substrait::Expression::Liter
     VELOX_FAIL("Unexpected string or binary literal");
   }
 }
-
+// substrait function -> velox function
 std::unordered_map<std::string, std::string> SubstraitParser::substraitVeloxFunctionMap_ = {
     {"is_not_null", "isnotnull"}, /*Spark functions.*/
     {"is_null", "isnull"},

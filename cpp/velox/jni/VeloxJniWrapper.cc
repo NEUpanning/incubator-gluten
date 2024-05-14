@@ -106,13 +106,13 @@ Java_org_apache_gluten_vectorized_PlanEvaluatorJniWrapper_nativeValidateWithFail
   }
 
   ::substrait::Plan subPlan;
-  gluten::parseProtobuf(planData, planSize, &subPlan);
+  gluten::parseProtobuf(planData, planSize, &subPlan); // pb 格式的Substrait plan转换为对象
 
   // A query context with dummy configs. Used for function validation.
   std::unordered_map<std::string, std::string> configs{
       {velox::core::QueryConfig::kSparkPartitionId, "0"}, {velox::core::QueryConfig::kSessionTimezone, "GMT"}};
   velox::core::QueryCtx queryCtx(nullptr, velox::core::QueryConfig(configs));
-  auto pool = gluten::defaultLeafVeloxMemoryPool().get();
+  auto pool = gluten::defaultLeafVeloxMemoryPool().get(); // 默认的memory manager
   // An execution context used for function validation.
   velox::core::ExecCtx execCtx(pool, &queryCtx);
 
