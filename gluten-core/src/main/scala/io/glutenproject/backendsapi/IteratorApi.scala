@@ -32,7 +32,7 @@ import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.utils.OASPackageBridge.InputMetricsWrapper
 import org.apache.spark.sql.vectorized.ColumnarBatch
 
-trait IteratorApi {
+trait IteratorApi { // 创建native iterator，iterator实现了native处理数据的逻辑
 
   /**
    * Generate native row partition.
