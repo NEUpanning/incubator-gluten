@@ -28,7 +28,7 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
   </licenses>
-
+<!-- maven配置包含的module-->
   <modules>
     <module>gluten-core</module>
     <module>gluten-ui</module>
@@ -106,7 +106,7 @@
     <scalastyle.version>1.0.0</scalastyle.version>
     <scalatest-maven-plugin.version>2.2.0</scalatest-maven-plugin.version>
   </properties>
-
+<!--不同的java版本、spark版本、backend等配置-->
   <profiles>
     <profile>
       <id>java-8</id>
@@ -534,7 +534,7 @@
 
   <build>
     <extensions>
-      <!-- provides os.detected.classifier (i.e. linux-x86_64, osx-x86_64) property -->
+      <!-- provides os.detected.classifier (i.e. linux-x86_64, osx-x86_64) property 提供操作系统信息-->
       <extension>
         <groupId>kr.motd.maven</groupId>
         <artifactId>os-maven-plugin</artifactId>
@@ -552,14 +552,14 @@
               <goals>
                 <goal>jar</goal>
               </goals>
-              <configuration>
+              <configuration><!--classifier表示在相同版本下针对不同的环境或者jdk使用的jar,如果配置了这个元素，则会将这个元素名在加在最后来查找相应的jar-->
                 <classifier>${scala.binary.version}</classifier>
                 <classifier>${sparkbundle.version}</classifier>
               </configuration>
             </execution>
           </executions>
         </plugin>
-        <plugin>
+        <plugin><!--    配置编译相关参数   -->
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${maven.compiler.plugin}</version>
@@ -572,7 +572,7 @@
             </compilerArgs>
           </configuration>
         </plugin>
-        <plugin>
+        <plugin><!--    支持scala test   -->
           <groupId>org.scalatest</groupId>
           <artifactId>scalatest-maven-plugin</artifactId>
           <version>${scalatest-maven-plugin.version}</version>
@@ -621,7 +621,7 @@
             </execution>
           </executions>
         </plugin>
-        <plugin>
+        <plugin><!-- 执行  check style    -->
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
           <version>3.1.1</version>
@@ -656,7 +656,7 @@
             </execution>
           </executions>
         </plugin>
-        <plugin>
+        <plugin><!--    scala style check   -->
           <groupId>org.scalastyle</groupId>
           <artifactId>scalastyle-maven-plugin</artifactId>
           <version>${scalastyle.version}</version>
@@ -680,7 +680,7 @@
             </execution>
           </executions>
         </plugin>
-        <plugin>
+        <plugin><!--    package fat jar   -->
           <artifactId>maven-assembly-plugin</artifactId>
           <version>3.3.0</version>
           <configuration>
