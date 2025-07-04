@@ -26,6 +26,7 @@
 #include "shuffle/Utils.h"
 #include "utils/Exception.h"
 #include "utils/Timer.h"
+#include <glog/logging.h>
 
 namespace gluten {
 namespace {
@@ -376,8 +377,14 @@ arrow::Result<std::unique_ptr<InMemoryPayload>> InMemoryPayload::merge(
         auto resizable = std::dynamic_pointer_cast<arrow::ResizableBuffer>(sourceBuffer);
         auto mergedBytes = arrow::bit_util::BytesForBits(mergedRows);
         if (resizable) {
+          auto reservedBytes = arrow::bit_util::BytesForBits(4096);
+          DLOG(INFO) << "mergedRows:" << mergedRows << " reservedBytes: " << reservedBytes << " mergedBytes: " << mergedBytes;
+          if (reservedBytes < mergedBytes) {
+            LOG(INFO) << "reservedBytes < mergedBytes" << " reservedBytes: " << reservedBytes << " mergedBytes: " << mergedBytes ;
+          }
           // If source is resizable, resize and reuse source.
-          RETURN_NOT_OK(resizable->Resize(mergedBytes));
+          RETURN_NOT_OK(resizable->Reserve(reservedBytes));
+          RETURN_NOT_OK(resizable->Resize(mergedBytes, false));
         } else {
           // Otherwise copy source.
           ARROW_ASSIGN_OR_RAISE(resizable, arrow::AllocateResizableBuffer(mergedBytes, pool));
@@ -400,8 +407,15 @@ arrow::Result<std::unique_ptr<InMemoryPayload>> InMemoryPayload::merge(
         auto mergedSize = sourceBufferSize + appendBuffer->size();
         auto resizable = std::dynamic_pointer_cast<arrow::ResizableBuffer>(sourceBuffer);
         if (resizable) {
+          auto avgSize = static_cast<float>(mergedSize) / mergedRows;
+          auto reservedBytes = avgSize * 4096 + 1;
+          if (reservedBytes < mergedSize) {
+            LOG(INFO) << "reservedBytes < mergedSize" << " reservedBytes: " << reservedBytes << " mergedSize: " << mergedSize ;
+          }
+          DLOG(INFO) << "mergedRows:" << mergedRows << " reservedBytes: " << reservedBytes << " mergedSize: " << mergedSize;
           // If source is resizable, resize and reuse source.
-          RETURN_NOT_OK(resizable->Resize(mergedSize));
+          RETURN_NOT_OK(resizable->Reserve(reservedBytes));
+          RETURN_NOT_OK(resizable->Resize(mergedSize, false));
         } else {
           // Otherwise copy source.
           ARROW_ASSIGN_OR_RAISE(resizable, arrow::AllocateResizableBuffer(mergedSize, pool));
